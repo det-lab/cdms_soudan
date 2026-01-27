@@ -25,7 +25,9 @@ jobs:
       - name: Install Kaitai Struct Compiler
         run: |
           KSC_VERSION=0.11
+          KSC_SHA256=ff89389d9dc9e770d78a24af328763cb1f8e7b31ce7766c9edf10669a060f2a2
           curl -L -o /tmp/ksc.zip "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/${KSC_VERSION}/kaitai-struct-compiler-${KSC_VERSION}.zip"
+          echo "${KSC_SHA256}  /tmp/ksc.zip" | sha256sum -c -
           unzip -q /tmp/ksc.zip -d /tmp/ksc
           KSC_DIR="/tmp/ksc/kaitai-struct-compiler-${KSC_VERSION}/bin"
           echo "${KSC_DIR}" >> "$GITHUB_PATH"
