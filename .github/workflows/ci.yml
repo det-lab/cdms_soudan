@@ -27,7 +27,13 @@ jobs:
           KSC_VERSION=0.11
           curl -L -o /tmp/ksc.zip "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/${KSC_VERSION}/kaitai-struct-compiler-${KSC_VERSION}.zip"
           unzip -q /tmp/ksc.zip -d /tmp/ksc
-          echo "/tmp/ksc/kaitai-struct-compiler-${KSC_VERSION}/bin" >> "$GITHUB_PATH"
+          KSC_DIR="/tmp/ksc/kaitai-struct-compiler-${KSC_VERSION}/bin"
+          echo "${KSC_DIR}" >> "$GITHUB_PATH"
+          if [ -x "${KSC_DIR}/ksc" ]; then
+            echo "KSC=${KSC_DIR}/ksc" >> "$GITHUB_ENV"
+          else
+            echo "KSC=${KSC_DIR}/kaitai-struct-compiler" >> "$GITHUB_ENV"
+          fi
 
       - name: Build and test
         run: make all

@@ -4,6 +4,7 @@ VENV := .venv
 PYTHON := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 PYTEST := $(VENV)/bin/pytest
+KSC ?= ksc
 
 all: setup build-soudan build-hdf5 kaitai-gen test test-kaitai
 
@@ -22,7 +23,7 @@ build-hdf5:
 	$(PYTHON) scdms_soudan_parser.py
 
 kaitai-gen:
-	ksc -t python kaitai/scdms_soudan.ksy
+	$(KSC) -t python kaitai/scdms_soudan.ksy
 
 test:
 	$(PYTEST) -q test_minimal_hdf5.py
