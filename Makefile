@@ -1,4 +1,4 @@
-.PHONY: all setup build-soudan build-hdf5 kaitai-gen test test-kaitai
+.PHONY: all setup build-soudan build-hdf5 kaitai-gen test test-kaitai pretty-print
 
 VENV := .venv
 PYTHON := $(VENV)/bin/python
@@ -30,3 +30,6 @@ test:
 
 test-kaitai:
 	$(PYTEST) -q test_kaitai_minimal.py
+
+pretty-print:
+	$(PYTHON) kaitai_pretty_print.py minimal_sample.soudan
