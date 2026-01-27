@@ -4,3 +4,9 @@ __pycache__/
 *.pyd
 .venv/
 soudan.py
+
+# Generated kaitai artifacts
+kaitai/build/
+kaitai/libsoudan.so
+kaitai/soudan.cpp
+kaitai/soudan.h
