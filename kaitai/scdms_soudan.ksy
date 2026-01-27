@@ -64,7 +64,7 @@ types:
         type: u4
       - id: section
         type:
-          switch-on: ((header >> 16) == 0xA980) ? 0xA980 : header
+          switch-on: '((header >> 16) == 0xA980) ? 0xA980 : header'
           cases:
             0xA980: event_header
             0x00000002: administrative_record

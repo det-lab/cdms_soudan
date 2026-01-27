@@ -16,10 +16,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install Kaitai Struct Compiler
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          KSC_VERSION=0.11
+          curl -L -o /tmp/ksc.zip "https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/${KSC_VERSION}/kaitai-struct-compiler-${KSC_VERSION}.zip"
+          unzip -q /tmp/ksc.zip -d /tmp/ksc
+          echo "/tmp/ksc/kaitai-struct-compiler-${KSC_VERSION}/bin" >> "$GITHUB_PATH"
 
       - name: Build and test
         run: make all

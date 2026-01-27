@@ -2,3 +2,4 @@ construct
 h5py
 numpy
 pytest
+kaitaistruct
