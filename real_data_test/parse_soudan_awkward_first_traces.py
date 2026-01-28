@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import resource
 import time
 from pathlib import Path
 
@@ -11,7 +12,19 @@ from awkward_kaitai import Reader
 
 
 def _safe_numpy(array) -> np.ndarray:
-    return ak.to_numpy(ak.flatten(array))
+    return ak.to_numpy(ak.flatten(array, axis=None))
+
+
+def _project_union(array, field_name: str):
+    layout = ak.to_layout(array)
+    if isinstance(layout, ak.contents.UnionArray):
+        matches = []
+        for idx, content in enumerate(layout.contents):
+            if isinstance(content, ak.contents.RecordArray) and field_name in content.fields:
+                matches.append(idx)
+        if len(matches) == 1:
+            return ak.Array(layout.project(matches[0]))
+    return array
 
 
 def summarize_first_traces(file_path: Path, lib_path: Path, limit: int = 1000) -> None:
@@ -24,12 +37,18 @@ def summarize_first_traces(file_path: Path, lib_path: Path, limit: int = 1000) -
     headers = records["logical_recordA__Zheader"]
     trace_records = records[headers == 0x00000011][:limit]
 
-    trace_meta = trace_records["logical_recordA__Zsection"]["trace_dataA__Ztrace_rcrd"]
+    trace_section = _project_union(
+        trace_records["logical_recordA__Zsection"], "trace_dataA__Ztrace_rcrd"
+    )
+    trace_meta = trace_section["trace_dataA__Ztrace_rcrd"]
     trace_len = _safe_numpy(trace_meta["trace_recordA__Ztrace_len"])
     num_samples = _safe_numpy(trace_meta["trace_recordA__Znum_samples"])
     detector_code = _safe_numpy(trace_meta["trace_recordA__Zdetector_code"])
 
-    sample_records = trace_records["logical_recordA__Zsection"]["trace_dataA__Zsample_data"]
+    sample_section = _project_union(
+        trace_records["logical_recordA__Zsection"], "trace_dataA__Zsample_data"
+    )
+    sample_records = sample_section["trace_dataA__Zsample_data"]
     sample_a = _safe_numpy(sample_records["data_sampleA__Zsample_a"])
     sample_b = _safe_numpy(sample_records["data_sampleA__Zsample_b"])
     if len(sample_a) or len(sample_b):
@@ -43,6 +62,8 @@ def summarize_first_traces(file_path: Path, lib_path: Path, limit: int = 1000) -
     print(f"  file: {file_path.name}")
     print(f"  traces: {len(trace_len)}")
     print(f"  elapsed: {elapsed:.2f}s")
+    max_rss_kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    print(f"  max_rss_kb: {max_rss_kb}")
     if len(trace_len):
         print(f"  trace_len: min={trace_len.min()} max={trace_len.max()} mean={trace_len.mean():.2f}")
     if len(num_samples):
